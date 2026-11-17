@@ -1,0 +1,11 @@
+# Integration checklist, NOT a complete runnable Nav2 parameter file.
+status: NOT_CONNECTED
+follow_path_action: null
+speed_limit_topic: null
+controller_id: null
+cmd_vel_nav_topic: null
+collision_monitor_input: null
+collision_monitor_output: null
+twist_stamped: null
+map_version: null
+path_version: null

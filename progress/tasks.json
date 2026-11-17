@@ -1,0 +1,851 @@
+{
+  "schema_version": 1,
+  "stages": [
+    {
+      "id": "S00",
+      "title": "장비와 데이터 계약",
+      "day": "D1",
+      "owner": "D",
+      "depends_on": [],
+      "acceptance": "두 대 토픽·TF·명령 형식·버전·시각 확인",
+      "optional": false
+    },
+    {
+      "id": "S01",
+      "title": "최종 명령과 정지",
+      "day": "D1",
+      "owner": "D",
+      "depends_on": [
+        "S00"
+      ],
+      "acceptance": "실물에서 개별 정지·통신 끊김·다중 정지 해제 확인",
+      "optional": false
+    },
+    {
+      "id": "S02",
+      "title": "정찰랩과 SLAM",
+      "day": "D2",
+      "owner": "A",
+      "depends_on": [
+        "S00",
+        "S01"
+      ],
+      "acceptance": "사전 지도 없이 저속 한 바퀴와 지도 생성",
+      "optional": false
+    },
+    {
+      "id": "S03",
+      "title": "지도 확정과 경로",
+      "day": "D3",
+      "owner": "A",
+      "depends_on": [
+        "S02"
+      ],
+      "acceptance": "같은 map/path 버전으로 두 대 위치 확인",
+      "optional": false
+    },
+    {
+      "id": "S04",
+      "title": "단독 경기 주행",
+      "day": "D3",
+      "owner": "A",
+      "depends_on": [
+        "S03"
+      ],
+      "acceptance": "정찰로 만든 경로에서 연속 완주",
+      "optional": false
+    },
+    {
+      "id": "S05",
+      "title": "그리드와 기본 경기",
+      "day": "D4-D5",
+      "owner": "D",
+      "depends_on": [
+        "S04",
+        "S01"
+      ],
+      "acceptance": "정찰부터 두 대 3랩과 종료까지 통합",
+      "optional": false
+    },
+    {
+      "id": "S06",
+      "title": "랜덤 장애물과 사람",
+      "day": "D4-D6",
+      "owner": "B",
+      "depends_on": [
+        "S01",
+        "S04"
+      ],
+      "acceptance": "무작위 배치 시험과 보호 구역 검증",
+      "optional": false
+    },
+    {
+      "id": "S07",
+      "title": "깃발과 경기 제한",
+      "day": "D6",
+      "owner": "C",
+      "depends_on": [
+        "S05"
+      ],
+      "acceptance": "실물 영상으로 제한·해제와 레드 재출발 없음",
+      "optional": false
+    },
+    {
+      "id": "S08",
+      "title": "SC와 페널티 및 표시",
+      "day": "D7",
+      "owner": "C/D",
+      "depends_on": [
+        "S05",
+        "S06",
+        "S07"
+      ],
+      "acceptance": "그린 복귀·중첩 정지·표시 일치",
+      "optional": false
+    },
+    {
+      "id": "S09",
+      "title": "추종과 지정 추월",
+      "day": "D7-D8",
+      "owner": "A/C",
+      "depends_on": [
+        "S06",
+        "S07"
+      ],
+      "acceptance": "정해진 직선에서 반복 추월과 취소",
+      "optional": false
+    },
+    {
+      "id": "S10",
+      "title": "DRS 연결",
+      "day": "D8",
+      "owner": "C",
+      "depends_on": [
+        "S08",
+        "S09"
+      ],
+      "acceptance": "허용 조건만 가속, 위험 상황 즉시 해제",
+      "optional": false
+    },
+    {
+      "id": "S11",
+      "title": "통합과 배포",
+      "day": "D9-D10",
+      "owner": "ALL",
+      "depends_on": [
+        "S10"
+      ],
+      "acceptance": "전체 시험 증거와 재현 가능한 실행",
+      "optional": false
+    },
+    {
+      "id": "S12",
+      "title": "아이템과 코너링 보상",
+      "day": "남는 시간",
+      "owner": "C",
+      "depends_on": [
+        "S11"
+      ],
+      "acceptance": "필수 기능 완료 후 선택 구현",
+      "optional": true
+    }
+  ],
+  "tasks": [
+    {
+      "id": "S00-01",
+      "stage": "S00",
+      "title": "A의 센서 조사",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S00-02",
+      "stage": "S00",
+      "title": "B의 카메라 조사",
+      "owner": "B",
+      "status": "TODO",
+      "depends_on": [],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S00-03",
+      "stage": "S00",
+      "title": "C의 상태 정의",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S00-04",
+      "stage": "S00",
+      "title": "D의 연결 조사",
+      "owner": "D",
+      "status": "TODO",
+      "depends_on": [],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S01-01",
+      "stage": "S01",
+      "title": "제어권 선택",
+      "owner": "D",
+      "status": "TODO",
+      "depends_on": [
+        "S00"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S01-02",
+      "stage": "S01",
+      "title": "센서 timeout",
+      "owner": "D",
+      "status": "TODO",
+      "depends_on": [
+        "S00"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S01-03",
+      "stage": "S01",
+      "title": "중앙 heartbeat timeout",
+      "owner": "D",
+      "status": "TODO",
+      "depends_on": [
+        "S00"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S01-04",
+      "stage": "S01",
+      "title": "실제 정지 거리",
+      "owner": "D",
+      "status": "TODO",
+      "depends_on": [
+        "S00"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S02-01",
+      "stage": "S02",
+      "title": "벽 추종",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S00",
+        "S01"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S02-02",
+      "stage": "S02",
+      "title": "SLAM 연결",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S00",
+        "S01"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S02-03",
+      "stage": "S02",
+      "title": "복귀 판정",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S00",
+        "S01"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S02-04",
+      "stage": "S02",
+      "title": "로그 수집",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S00",
+        "S01"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S03-01",
+      "stage": "S03",
+      "title": "루프 보정 확인",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S02"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S03-02",
+      "stage": "S03",
+      "title": "중심 경로 추출",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S02"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S03-03",
+      "stage": "S03",
+      "title": "폐곡선과 여유 검사",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S02"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S03-04",
+      "stage": "S03",
+      "title": "지도 B 공유",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S02"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S04-01",
+      "stage": "S04",
+      "title": "FollowPath 연결",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S03"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S04-02",
+      "stage": "S04",
+      "title": "RPP 비교",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S03"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S04-03",
+      "stage": "S04",
+      "title": "필요 시 MPPI 비교",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S03"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S04-04",
+      "stage": "S04",
+      "title": "곡률 속도 상한",
+      "owner": "A",
+      "status": "TODO",
+      "depends_on": [
+        "S03"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S05-01",
+      "stage": "S05",
+      "title": "칸별 표식",
+      "owner": "D",
+      "status": "TODO",
+      "depends_on": [
+        "S04",
+        "S01"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S05-02",
+      "stage": "S05",
+      "title": "순차 정렬",
+      "owner": "D",
+      "status": "TODO",
+      "depends_on": [
+        "S04",
+        "S01"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S05-03",
+      "stage": "S05",
+      "title": "출발등",
+      "owner": "D",
+      "status": "TODO",
+      "depends_on": [
+        "S04",
+        "S01"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S05-04",
+      "stage": "S05",
+      "title": "랩 및 체커",
+      "owner": "D",
+      "status": "TODO",
+      "depends_on": [
+        "S04",
+        "S01"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S06-01",
+      "stage": "S06",
+      "title": "YOLO 데이터",
+      "owner": "B",
+      "status": "TODO",
+      "depends_on": [
+        "S01",
+        "S04"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S06-02",
+      "stage": "S06",
+      "title": "거리 연관",
+      "owner": "B",
+      "status": "TODO",
+      "depends_on": [
+        "S01",
+        "S04"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S06-03",
+      "stage": "S06",
+      "title": "콘과 볼라드 회피",
+      "owner": "B",
+      "status": "TODO",
+      "depends_on": [
+        "S01",
+        "S04"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S06-04",
+      "stage": "S06",
+      "title": "사람 정지와 해제",
+      "owner": "B",
+      "status": "TODO",
+      "depends_on": [
+        "S01",
+        "S04"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S07-01",
+      "stage": "S07",
+      "title": "옐로",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S05"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S07-02",
+      "stage": "S07",
+      "title": "그린 시각 조건",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S05"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S07-03",
+      "stage": "S07",
+      "title": "레드 terminal",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S05"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S07-04",
+      "stage": "S07",
+      "title": "명령 중복 배제",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S05"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S08-01",
+      "stage": "S08",
+      "title": "SC 순서 유지",
+      "owner": "C/D",
+      "status": "TODO",
+      "depends_on": [
+        "S05",
+        "S06",
+        "S07"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S08-02",
+      "stage": "S08",
+      "title": "실제 정지 페널티 계시",
+      "owner": "C/D",
+      "status": "TODO",
+      "depends_on": [
+        "S05",
+        "S06",
+        "S07"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S08-03",
+      "stage": "S08",
+      "title": "LED LCD",
+      "owner": "C/D",
+      "status": "TODO",
+      "depends_on": [
+        "S05",
+        "S06",
+        "S07"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S08-04",
+      "stage": "S08",
+      "title": "랩시간 표시",
+      "owner": "C/D",
+      "status": "TODO",
+      "depends_on": [
+        "S05",
+        "S06",
+        "S07"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S09-01",
+      "stage": "S09",
+      "title": "앞차 식별",
+      "owner": "A/C",
+      "status": "TODO",
+      "depends_on": [
+        "S06",
+        "S07"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S09-02",
+      "stage": "S09",
+      "title": "후보 경로 검사",
+      "owner": "A/C",
+      "status": "TODO",
+      "depends_on": [
+        "S06",
+        "S07"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S09-03",
+      "stage": "S09",
+      "title": "PASS MERGE",
+      "owner": "A/C",
+      "status": "TODO",
+      "depends_on": [
+        "S06",
+        "S07"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S09-04",
+      "stage": "S09",
+      "title": "추월 취소",
+      "owner": "A/C",
+      "status": "TODO",
+      "depends_on": [
+        "S06",
+        "S07"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S10-01",
+      "stage": "S10",
+      "title": "검출선 자격",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S08",
+        "S09"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S10-02",
+      "stage": "S10",
+      "title": "사용 구간",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S08",
+        "S09"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S10-03",
+      "stage": "S10",
+      "title": "최종 속도 제한",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S08",
+        "S09"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S10-04",
+      "stage": "S10",
+      "title": "초록 LED",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S08",
+        "S09"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S11-01",
+      "stage": "S11",
+      "title": "랜덤 시험",
+      "owner": "ALL",
+      "status": "TODO",
+      "depends_on": [
+        "S10"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S11-02",
+      "stage": "S11",
+      "title": "통신 fault",
+      "owner": "ALL",
+      "status": "TODO",
+      "depends_on": [
+        "S10"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S11-03",
+      "stage": "S11",
+      "title": "실행 설명",
+      "owner": "ALL",
+      "status": "TODO",
+      "depends_on": [
+        "S10"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S11-04",
+      "stage": "S11",
+      "title": "모델 설정 동결",
+      "owner": "ALL",
+      "status": "TODO",
+      "depends_on": [
+        "S10"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S12-01",
+      "stage": "S12",
+      "title": "획득 ID",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S11"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S12-02",
+      "stage": "S12",
+      "title": "부스터",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S11"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S12-03",
+      "stage": "S12",
+      "title": "감속",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S11"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    },
+    {
+      "id": "S12-04",
+      "stage": "S12",
+      "title": "코너 보상",
+      "owner": "C",
+      "status": "TODO",
+      "depends_on": [
+        "S11"
+      ],
+      "environment": "hardware",
+      "evidence": [],
+      "note": ""
+    }
+  ]
+}

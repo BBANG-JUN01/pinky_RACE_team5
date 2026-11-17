@@ -1,0 +1,24 @@
+schema_version: 1
+hardware_enabled: false
+target_laps: 3
+recon_robot: robot_a
+recon_requires_new_map: true
+controller_candidate: rpp
+allow_reverse: false
+items_enabled: false
+corner_energy_enabled: false
+# null means not measured; must not become zero/default motion silently.
+measured:
+  hardware_speed_cap_mps: null
+  recon_speed_mps: null
+  race_speed_mps: null
+  yellow_speed_mps: null
+  sc_speed_mps: null
+  drs_speed_mps: null
+  drs_gap_m: null
+  stop_distance_m: null
+  sensor_timeout_s: null
+  command_timeout_s: null
+  heartbeat_timeout_s: null
+  grid_position_tolerance_m: null
+  grid_yaw_tolerance_rad: null

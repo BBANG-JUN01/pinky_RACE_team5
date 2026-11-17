@@ -1,0 +1,174 @@
+Software validation only; no physical robot or ROS build.
+
+$ python3 scripts/check_core.py
+
+test_batch_red_wins (test_core.CoreTests.test_batch_red_wins) ... ok
+test_display_priorities (test_core.CoreTests.test_display_priorities) ... ok
+test_drs_cannot_override_stop (test_core.CoreTests.test_drs_cannot_override_stop) ... ok
+test_drs_is_effective_not_only_requested (test_core.CoreTests.test_drs_is_effective_not_only_requested) ... ok
+test_duplicate (test_core.CoreTests.test_duplicate) ... ok
+test_equal_green_does_not_unlock (test_core.CoreTests.test_equal_green_does_not_unlock) ... ok
+test_gap_direction_and_lap (test_core.CoreTests.test_gap_direction_and_lap) ... ok
+test_independent_stop_reasons (test_core.CoreTests.test_independent_stop_reasons) ... ok
+test_invalid_penalty (test_core.CoreTests.test_invalid_penalty) ... ok
+test_ordered_lap (test_core.CoreTests.test_ordered_lap) ... ok
+test_penalty_motion_resets_timer (test_core.CoreTests.test_penalty_motion_resets_timer) ... ok
+test_penalty_waits_for_actual_stop (test_core.CoreTests.test_penalty_waits_for_actual_stop) ... ok
+test_red_is_terminal (test_core.CoreTests.test_red_is_terminal) ... ok
+test_reverse_gate_rejected (test_core.CoreTests.test_reverse_gate_rejected) ... ok
+test_sc_survives_yellow (test_core.CoreTests.test_sc_survives_yellow) ... ok
+test_stale_data_stops (test_core.CoreTests.test_stale_data_stops) ... ok
+test_stale_green (test_core.CoreTests.test_stale_green) ... ok
+test_timer_freezes (test_core.CoreTests.test_timer_freezes) ... ok
+test_wrong_race (test_core.CoreTests.test_wrong_race) ... ok
+test_yellow_blocks_drs (test_core.CoreTests.test_yellow_blocks_drs) ... ok
+test_detector_filters_invalid_boxes (test_guides.GuideTests.test_detector_filters_invalid_boxes) ... ok
+test_display_priorities_and_timing (test_guides.GuideTests.test_display_priorities_and_timing) ... ok
+test_full_race_and_individual_finish (test_guides.GuideTests.test_full_race_and_individual_finish) ... ok
+test_grid_duplicate_marker_invalid (test_guides.GuideTests.test_grid_duplicate_marker_invalid) ... ok
+test_grid_requires_stable_stop_and_clears_on_loss (test_guides.GuideTests.test_grid_requires_stable_stop_and_clears_on_loss) ... ok
+test_guard_curvature_and_stop (test_guides.GuideTests.test_guard_curvature_and_stop) ... ok
+test_guard_default_disabled (test_guides.GuideTests.test_guard_default_disabled) ... ok
+test_guard_rejects_wrong_owner_and_future (test_guides.GuideTests.test_guard_rejects_wrong_owner_and_future) ... ok
+test_health_missing_stale_and_reverse_clock (test_guides.GuideTests.test_health_missing_stale_and_reverse_clock) ... ok
+test_lights_require_sequence_and_fresh_roi (test_guides.GuideTests.test_lights_require_sequence_and_fresh_roi) ... ok
+test_manifest_requires_verification_and_all_artifacts (test_guides.GuideTests.test_manifest_requires_verification_and_all_artifacts) ... ok
+test_nav_cancel_ack_blocks_replacement (test_guides.GuideTests.test_nav_cancel_ack_blocks_replacement) ... ok
+test_operator_rejects_direct_start (test_guides.GuideTests.test_operator_rejects_direct_start) ... ok
+test_overtake_aborts_under_sc (test_guides.GuideTests.test_overtake_aborts_under_sc) ... ok
+test_path_degenerate (test_guides.GuideTests.test_path_degenerate) ... ok
+test_path_projects_to_segment_not_waypoint (test_guides.GuideTests.test_path_projects_to_segment_not_waypoint) ... ok
+test_penalty_stale_odom_resets_continuous_timer (test_guides.GuideTests.test_penalty_stale_odom_resets_continuous_timer) ... ok
+test_race_rejects_invalid_transitions_and_deduplicates (test_guides.GuideTests.test_race_rejects_invalid_transitions_and_deduplicates) ... ok
+test_range_requires_calibration_and_sync (test_guides.GuideTests.test_range_requires_calibration_and_sync) ... ok
+test_rank_ties (test_guides.GuideTests.test_rank_ties) ... ok
+test_recon_requires_departure_and_distance (test_guides.GuideTests.test_recon_requires_departure_and_distance) ... ok
+test_recon_timeout (test_guides.GuideTests.test_recon_timeout) ... ok
+test_red_is_terminal (test_guides.GuideTests.test_red_is_terminal) ... ok
+test_speed_drs_disabled_for_sc_and_person (test_guides.GuideTests.test_speed_drs_disabled_for_sc_and_person) ... ok
+test_wall_invalid_and_front_blocked (test_guides.GuideTests.test_wall_invalid_and_front_blocked) ... ok
+
+----------------------------------------------------------------------
+Ran 45 tests in 0.005s
+
+OK
+
+exit_code=0
+
+$ python3 scripts/guide_smoke.py
+PASS pinky_gp_behavior.behavior_manager
+PASS pinky_gp_behavior.speed_policy
+PASS pinky_gp_dashboard.operator_server
+PASS pinky_gp_display.display_manager
+PASS pinky_gp_guard.command_guard
+PASS pinky_gp_guard.robot_health
+PASS pinky_gp_navigation.grid_manager
+PASS pinky_gp_navigation.nav2_adapter
+PASS pinky_gp_navigation.path_manager
+PASS pinky_gp_perception.detector
+PASS pinky_gp_perception.grid_reader
+PASS pinky_gp_perception.range_association
+PASS pinky_gp_perception.signal_reader
+PASS pinky_gp_race.penalty_manager
+PASS pinky_gp_race.progress_manager
+PASS pinky_gp_race.race_manager
+PASS pinky_gp_recon.map_finalize
+PASS pinky_gp_recon.recon_manager
+PASS pinky_gp_recon.wall_follower
+19 demos passed; Python AST and package XML parsed.
+
+
+exit_code=0
+
+$ python3 scripts/replay_demo.py
+YELLOW restriction= YELLOW aborted= False cap= 0.1 display= ('YELLOW', 'YELLOW')
+GREEN restriction= NORMAL aborted= False cap= 0.2 display= ('GREEN', 'DRS ON')
+SC_ON restriction= SC aborted= False cap= 0.1 display= ('YELLOW_SLOW', 'SC')
+GREEN restriction= NORMAL aborted= False cap= 0.2 display= ('GREEN', 'DRS ON')
+RED restriction= NORMAL aborted= True cap= 0.0 display= ('RED', 'RACE ABORTED')
+GREEN restriction= NORMAL aborted= True cap= 0.0 display= ('RED', 'RACE ABORTED')
+
+
+exit_code=0
+
+$ python3 scripts/race_scenario.py
+{"mode": "SYNTHETIC_ONLY", "at": 1.0, "phase": "RACING", "speed_cap": 0.18, "display": {"led": "GREEN", "primary": "DRS ON", "lines": ["A P- LAP 1/1", "CURRENT 00:01.00", "LAST --:--.--", "BEST --:--.--"], "clock_valid": true}}
+{"mode": "SYNTHETIC_ONLY", "at": 2.0, "phase": "RACING", "speed_cap": 0.06, "display": {"led": "YELLOW_SLOW", "primary": "SC", "lines": ["A P- LAP 1/1", "CURRENT 00:02.00", "LAST --:--.--", "BEST --:--.--"], "clock_valid": true}}
+{"mode": "SYNTHETIC_ONLY", "at": 3.0, "phase": "RACING", "speed_cap": 0.0, "display": {"led": "MAGENTA", "primary": "PENALTY 00:02.00", "lines": ["A P- LAP 1/1", "CURRENT 00:03.00", "LAST --:--.--", "BEST --:--.--"], "clock_valid": true}}
+{"mode": "SYNTHETIC_ONLY", "at": 4.0, "phase": "RACING", "speed_cap": 0.0, "display": {"led": "MAGENTA", "primary": "PENALTY 00:01.00", "lines": ["A P- LAP 1/1", "CURRENT 00:04.00", "LAST --:--.--", "BEST --:--.--"], "clock_valid": true}}
+{"mode": "SYNTHETIC_ONLY", "at": 5.0, "phase": "RACING", "speed_cap": 0.06, "display": {"led": "YELLOW_SLOW", "primary": "SC", "lines": ["A P- LAP 1/1", "CURRENT 00:05.00", "LAST --:--.--", "BEST --:--.--"], "clock_valid": true}}
+{"mode": "SYNTHETIC_ONLY", "at": 6.0, "phase": "RACING", "speed_cap": 0.18, "display": {"led": "GREEN", "primary": "DRS ON", "lines": ["A P- LAP 1/1", "CURRENT 00:06.00", "LAST --:--.--", "BEST --:--.--"], "clock_valid": true}}
+{"mode": "SYNTHETIC_ONLY", "at": 10.0, "phase": "FINISHED", "speed_cap": 0.0, "display": {"led": "WHITE", "primary": "FINISHED", "lines": ["A P- LAP 1/1", "CURRENT 00:00.00", "LAST 00:09.00", "BEST 00:09.00"], "clock_valid": true}}
+
+
+exit_code=0
+
+$ python3 scripts/progress.py status
+S00 D1       0/4 READY TO DEVELOP               장비와 데이터 계약
+  S00-01 TODO A의 센서 조사
+  S00-02 TODO B의 카메라 조사
+  S00-03 TODO C의 상태 정의
+  S00-04 TODO D의 연결 조사
+S01 D1       0/4 WAITING S00                    최종 명령과 정지
+  S01-01 TODO 제어권 선택
+  S01-02 TODO 센서 timeout
+  S01-03 TODO 중앙 heartbeat timeout
+  S01-04 TODO 실제 정지 거리
+S02 D2       0/4 WAITING S00,S01                정찰랩과 SLAM
+  S02-01 TODO 벽 추종
+  S02-02 TODO SLAM 연결
+  S02-03 TODO 복귀 판정
+  S02-04 TODO 로그 수집
+S03 D3       0/4 WAITING S02                    지도 확정과 경로
+  S03-01 TODO 루프 보정 확인
+  S03-02 TODO 중심 경로 추출
+  S03-03 TODO 폐곡선과 여유 검사
+  S03-04 TODO 지도 B 공유
+S04 D3       0/4 WAITING S03                    단독 경기 주행
+  S04-01 TODO FollowPath 연결
+  S04-02 TODO RPP 비교
+  S04-03 TODO 필요 시 MPPI 비교
+  S04-04 TODO 곡률 속도 상한
+S05 D4-D5    0/4 WAITING S04,S01                그리드와 기본 경기
+  S05-01 TODO 칸별 표식
+  S05-02 TODO 순차 정렬
+  S05-03 TODO 출발등
+  S05-04 TODO 랩 및 체커
+S06 D4-D6    0/4 WAITING S01,S04                랜덤 장애물과 사람
+  S06-01 TODO YOLO 데이터
+  S06-02 TODO 거리 연관
+  S06-03 TODO 콘과 볼라드 회피
+  S06-04 TODO 사람 정지와 해제
+S07 D6       0/4 WAITING S05                    깃발과 경기 제한
+  S07-01 TODO 옐로
+  S07-02 TODO 그린 시각 조건
+  S07-03 TODO 레드 terminal
+  S07-04 TODO 명령 중복 배제
+S08 D7       0/4 WAITING S05,S06,S07            SC와 페널티 및 표시
+  S08-01 TODO SC 순서 유지
+  S08-02 TODO 실제 정지 페널티 계시
+  S08-03 TODO LED LCD
+  S08-04 TODO 랩시간 표시
+S09 D7-D8    0/4 WAITING S06,S07                추종과 지정 추월
+  S09-01 TODO 앞차 식별
+  S09-02 TODO 후보 경로 검사
+  S09-03 TODO PASS MERGE
+  S09-04 TODO 추월 취소
+S10 D8       0/4 WAITING S08,S09                DRS 연결
+  S10-01 TODO 검출선 자격
+  S10-02 TODO 사용 구간
+  S10-03 TODO 최종 속도 제한
+  S10-04 TODO 초록 LED
+S11 D9-D10   0/4 WAITING S10                    통합과 배포
+  S11-01 TODO 랜덤 시험
+  S11-02 TODO 통신 fault
+  S11-03 TODO 실행 설명
+  S11-04 TODO 모델 설정 동결
+S12 남는 시간    0/4 WAITING S11                    아이템과 코너링 보상
+  S12-01 TODO 획득 ID
+  S12-02 TODO 부스터
+  S12-03 TODO 감속
+  S12-04 TODO 코너 보상
+
+
+exit_code=0

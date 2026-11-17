@@ -1,0 +1,9 @@
+std_msgs/Header header
+string race_id
+string robot_id
+string behavior
+string[] stop_reasons
+float32 speed_cap_mps
+bool drs_eligible
+bool drs_active
+string cap_reason

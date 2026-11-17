@@ -1,0 +1,9 @@
+std_msgs/Header header
+string race_id
+string robot_id
+string map_id
+geometry_msgs/PoseWithCovariance pose
+geometry_msgs/Twist measured_velocity
+bool pose_valid
+bool sensors_valid
+string phase

@@ -1,0 +1,11 @@
+std_msgs/Header header
+string robot_id
+string class_name
+float32 confidence
+float32 center_x_px
+float32 center_y_px
+float32 width_px
+float32 height_px
+bool range_valid
+float32 range_m
+string track_id

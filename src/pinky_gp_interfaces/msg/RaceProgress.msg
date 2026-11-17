@@ -1,0 +1,15 @@
+std_msgs/Header header
+string race_id
+string robot_id
+string path_id
+uint32 completed_laps
+uint32 target_laps
+uint32 next_gate
+float64 s_m
+float64 current_lap_s
+bool last_valid
+float64 last_lap_s
+bool best_valid
+float64 best_lap_s
+uint32 rank
+bool finished

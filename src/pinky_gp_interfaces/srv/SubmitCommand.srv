@@ -1,0 +1,5 @@
+pinky_gp_interfaces/RaceCommand command
+---
+bool accepted
+string reason
+uint64 revision

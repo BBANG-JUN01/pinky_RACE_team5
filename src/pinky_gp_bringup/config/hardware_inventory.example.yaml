@@ -1,0 +1,30 @@
+# Fill from the real robot; do not treat topic names as verified.
+schema_version: 1
+verified: false
+robots:
+  robot_a:
+    sbc_model: null
+    image_version: null
+    vendor_commit: null
+    scan_topic: null
+    odom_topic: null
+    imu_topic: null
+    camera_topic: null
+    motor_topic: null
+    motor_message_type: null
+    base_frame: null
+    lidar_frame: null
+    camera_frame: null
+  robot_b:
+    sbc_model: null
+    image_version: null
+    vendor_commit: null
+    scan_topic: null
+    odom_topic: null
+    imu_topic: null
+    camera_topic: null
+    motor_topic: null
+    motor_message_type: null
+    base_frame: null
+    lidar_frame: null
+    camera_frame: null
