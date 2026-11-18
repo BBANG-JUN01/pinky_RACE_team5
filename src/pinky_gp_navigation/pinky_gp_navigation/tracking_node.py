@@ -4,6 +4,7 @@ The upstream localization adapter must transform pose into the JSON path frame.
 import json, math, time
 from pathlib import Path
 from .pure_pursuit import PurePursuit, LapProgress
+from .hardware_limits import Limits, speed_profile
 
 def main(args=None):
     import rclpy
@@ -14,12 +15,16 @@ def main(args=None):
     class TrackingNode(Node):
         def __init__(self):
             super().__init__('pinky_gp_tracking')
-            for k,v in [('path_file',''),('pose_timeout',.25),('lookahead',.25),('speed',.15),('max_angular',.8),('max_error',.35),('target_laps',3)]:self.declare_parameter(k,v)
+            for k,v in [('path_file',''),('limits_file',''),('pose_timeout',.25),('lookahead',.25),('speed',.15),('max_angular',.8),('max_error',.35),('target_laps',3)]:self.declare_parameter(k,v)
             get=lambda k:self.get_parameter(k).value
             payload=json.loads(Path(get('path_file')).read_text())
             self.frame=payload['frame_id']
+            profile=json.loads(Path(get('limits_file')).read_text())
+            if profile.get('verified') is not True:raise ValueError('measured limits must be verified')
+            self.limits=Limits(**profile['limits'])
             if not isinstance(self.frame,str) or not self.frame:raise ValueError('path frame required')
             self.controller=PurePursuit(payload['points'],get('lookahead'),get('speed'),get('max_angular'),get('max_error'))
+            self.caps=speed_profile(payload['points'],self.limits)
             self.timeout=float(get('pose_timeout'));self.target=int(get('target_laps'))
             if not math.isfinite(self.timeout) or self.timeout<=0 or self.target<=0:raise ValueError('invalid timeout/laps')
             self.progress=LapProgress(self.controller.path.length,min(self.controller.path.length/8,.2))
@@ -51,6 +56,8 @@ def main(args=None):
                 else:
                     try:
                         v,w,p=self.controller.update(*self.pose);lap=self.progress.update(p['s'])
+                        cap=min(self.caps[p['segment']],self.caps[(p['segment']+1)%len(self.caps)])
+                        scale=min(1.,cap/max(v,1e-9));v*=scale;w*=scale
                         self.done=lap>=self.target
                         if not self.done:out.linear.x=v;out.angular.z=w
                         reason='FINISHED' if self.done else 'TRACKING'
