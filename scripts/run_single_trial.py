@@ -176,7 +176,12 @@ def run(args,folder,report):
                 '/gp/sim_cmd_vel','/gp/truth','/gp/status','/gp/event','/gp/guard_state'],
                 stdout=logs,stderr=subprocess.STDOUT,start_new_session=True,env=env)
         wait(lambda: last_state=='READY' and counts['scan'] and counts['odom'] and truth,'sensor readiness',75)
-        if n.count_publishers('/gp/sim_cmd_vel')!=1: raise RuntimeError('motor publisher ownership')
+        def guard_owns_motor():
+            writers=n.get_publishers_info_by_topic('/gp/sim_cmd_vel')
+            return (len(writers)==1 and writers[0].node_name=='sim_guard' and counts['cmd']>=2
+                    and cmd==(0.,0.) and commanded_at and time.monotonic()-commanded_at<.5)
+        wait(guard_owns_motor,'motor publisher discovery or duplicate owner',12)
+        log('motor_owner',node='sim_guard',observed_zero=True)
         if args.case=='rules' and args.backend=='gazebo':
             wait(lambda: counts['camera']>=2,'camera image',15)
             n.destroy_subscription(camera_sub)
