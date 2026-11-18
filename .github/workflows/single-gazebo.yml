@@ -22,7 +22,7 @@ jobs:
       - name: Install simulation dependencies
         run: |
           apt-get update -q
-          apt-get install -y --no-install-recommends git python3-colcon-common-extensions mesa-utils libgl1-mesa-dri ros-jazzy-ros-gz ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-nav2-map-server ros-jazzy-nav2-amcl ros-jazzy-nav2-lifecycle-manager
+          apt-get install -y --no-install-recommends git python3-colcon-common-extensions mesa-utils libgl1-mesa-dri ros-jazzy-ros-gz ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-nav2-map-server ros-jazzy-nav2-amcl ros-jazzy-nav2-lifecycle-manager ros-jazzy-slam-toolbox
       - name: Build team packages and the pinned official model
         run: |
           git clone https://github.com/pinklab-art/pinky_pro.git /tmp/pinky-model
@@ -34,7 +34,7 @@ jobs:
       - name: Run regression, ROS and Gazebo gates
         run: |
           source /tmp/gp_ws/install/setup.bash
-          python3 scripts/validate_racing.py --through gazebo --output "$GITHUB_WORKSPACE/log/ci"
+          python3 scripts/validate_racing.py --through gazebo --reuse-slam-map --output "$GITHUB_WORKSPACE/log/ci"
       - name: Preserve measurements and failure logs
         if: always()
         uses: actions/upload-artifact@v4

@@ -21,6 +21,7 @@ def options():
     p.add_argument('--domain',type=int,default=82)
     p.add_argument('--timeout',type=float,default=360,help='wall seconds per trial')
     p.add_argument('--output',type=Path,default=Path('log/gp_trials'))
+    p.add_argument('--map-file',type=Path,help='registered map of this scoring fixture')
     p.add_argument('--gui',action='store_true')
     p.add_argument('--bag',action='store_true')
     args=p.parse_args()
@@ -46,7 +47,7 @@ def run(args,folder,report):
     from rclpy.qos import qos_profile_sensor_data
     from geometry_msgs.msg import Twist
     from nav_msgs.msg import Odometry
-    from sensor_msgs.msg import LaserScan
+    from sensor_msgs.msg import Image, LaserScan
     from std_msgs.msg import String
     from std_srvs.srv import Trigger
     from ros_gz_interfaces.srv import ControlWorld,DeleteEntity,SpawnEntity
@@ -108,6 +109,11 @@ def run(args,folder,report):
     n.create_subscription(Odometry,'/gp/truth',truth_cb,qos_profile_sensor_data)
     n.create_subscription(Odometry,'/odom',odom_cb,qos_profile_sensor_data)
     n.create_subscription(LaserScan,'/scan',scan_cb,qos_profile_sensor_data)
+    if args.case=='rules' and args.backend=='gazebo':
+        def camera_cb(m):
+            if m.width>0 and m.height>0 and m.step>0 and len(m.data)==m.height*m.step:
+                counts['camera']+=1
+        camera_sub=n.create_subscription(Image,'/camera/image_raw',camera_cb,qos_profile_sensor_data)
     events=n.create_publisher(RaceCommand,'/gp/event',10)
     start=n.create_client(Trigger,'/gp/start')
     add=n.create_client(SpawnEntity,'/world/pinky_gp/create')
@@ -150,9 +156,18 @@ def run(args,folder,report):
     logs=(folder/'launch.log').open('w')
     env=os.environ.copy()
     laps=3 if args.case=='clean' else 1
+    configured_laps=3 if args.case=='watchdog' else laps
     launch=['ros2','launch','pinky_gp_bringup','single_gazebo.launch.py',
-            'backend:='+args.backend,'gui:='+str(args.gui).lower(),'laps:='+str(laps),
+            'backend:='+args.backend,'gui:='+str(args.gui).lower(),'laps:='+str(configured_laps),
             'track_dir:='+str(folder/'track'),'seed:='+str(args.seed)]
+    if args.map_file:
+        import hashlib
+        registered=args.map_file.resolve()
+        if not registered.is_file():
+            logs.close();trace.close();n.destroy_node();rclpy.try_shutdown()
+            raise RuntimeError('registered map path is missing')
+        report['map_yaml_sha256']=hashlib.sha256(registered.read_bytes()).hexdigest()
+        launch.append('map_file:='+str(registered))
     try:
         proc=subprocess.Popen(launch,stdout=logs,stderr=subprocess.STDOUT,start_new_session=True,env=env)
         if args.bag:
@@ -162,6 +177,9 @@ def run(args,folder,report):
                 stdout=logs,stderr=subprocess.STDOUT,start_new_session=True,env=env)
         wait(lambda: last_state=='READY' and counts['scan'] and counts['odom'] and truth,'sensor readiness',75)
         if n.count_publishers('/gp/sim_cmd_vel')!=1: raise RuntimeError('motor publisher ownership')
+        if args.case=='rules' and args.backend=='gazebo':
+            wait(lambda: counts['camera']>=2,'camera image',15)
+            n.destroy_subscription(camera_sub)
         service(start,Trigger.Request(),'start')
         wait(moving,'first physical motion',15)
         if args.case in ('cone','barrier'):
@@ -189,6 +207,7 @@ def run(args,folder,report):
             report['watchdog_zero_wall_s']=round(time.monotonic()-start_wall,3)
             if report['watchdog_zero_wall_s']>1.: raise RuntimeError('watchdog exceeded 1.0 wall second')
             req.world_control.pause=False;service(world,req,'unpause');wait(moving,'resume with fresh data')
+            event('CHECKER')  # Three laps configured; the next ordered line must terminate at one.
         elif args.case=='rules':
             for kind,cap in [('YELLOW',.12),('SC_ON',.09),('GREEN',.24)]:
                 event(kind)
@@ -224,6 +243,11 @@ def main():
     os.environ.update(ROS_DOMAIN_ID=str(a.domain),ROS_AUTOMATIC_DISCOVERY_RANGE='LOCALHOST',
                       GZ_PARTITION='gp_'+str(os.getpid())+'_'+folder.name)
     report={'backend':a.backend,'case':a.case,'seed':a.seed,'passed':False}
+    if shutil.which('git'):
+        version=subprocess.run(['git','-C',str(Path(__file__).resolve().parents[1]),'rev-parse','HEAD'],
+                               capture_output=True,text=True)
+        if version.returncode==0: report['git_commit']=version.stdout.strip()
+
     try:
         if not shutil.which('ros2'): raise RuntimeError('source /opt/ros/jazzy/setup.bash and the workspace install/setup.bash')
         if a.backend=='gazebo' and not shutil.which('gz'): raise RuntimeError('Gazebo Harmonic missing')

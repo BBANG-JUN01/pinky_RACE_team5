@@ -17,6 +17,11 @@ def start(context):
     def arg(k): return LaunchConfiguration(k).perform(context)
     directory = Path(arg('track_dir') or tempfile.mkdtemp(prefix='pinky_gp_track_'))
     write_track(directory)
+    map_yaml = Path(arg('map_file') or directory/'map.yaml').resolve()
+    path_json = Path(arg('path_file') or directory/'path.json').resolve()
+    world_sdf = Path(arg('world_file') or directory/'track.sdf').resolve()
+    for asset in (map_yaml,path_json,world_sdf):
+        if not asset.is_file(): raise FileNotFoundError(asset)
     description = Path(get_package_share_directory('pinky_description'))
     model = ET.fromstring(xacro.process_file(str(description/'urdf/robot.urdf.xacro'),
                            mappings={'namespace':'','is_sim':'true'}).toxml())
@@ -36,7 +41,7 @@ def start(context):
                     parameters=[{**sim,**(params or {})}],**kw)
     cmd=['gz','sim','-r','-v','2']
     if arg('gui').lower()!='true': cmd += ['-s','--headless-rendering']
-    cmd.append(str(directory/'track.sdf'))
+    cmd.append(str(world_sdf))
     resources=os.pathsep.join(filter(None,[str(description.parent),os.environ.get('GZ_SIM_RESOURCE_PATH')]))
     gazebo_actions = [
         SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH',resources),
@@ -55,7 +60,7 @@ def start(context):
     return simulation+[
         node('robot_state_publisher','robot_state_publisher','robot_state_publisher',
              {'robot_description':ParameterValue(ET.tostring(model,encoding='unicode'),value_type=str)}),
-        node('nav2_map_server','map_server','map_server',{'yaml_filename':str(directory/'map.yaml')}),
+        node('nav2_map_server','map_server','map_server',{'yaml_filename':str(map_yaml)}),
         node('nav2_amcl','amcl','amcl',{'set_initial_pose':True,'initial_pose.x':0.,
              'initial_pose.y':0.,'initial_pose.yaw':0.,'base_frame_id':'base_footprint',
              'odom_frame_id':'odom','global_frame_id':'map','scan_topic':'scan',
@@ -66,11 +71,13 @@ def start(context):
              {'autostart':True,'node_names':['map_server','amcl']}),
         node('pinky_gp_guard','sim_guard','sim_guard',on_exit=Shutdown(reason='motor guard exited')),
         node('pinky_gp_navigation','sensor_driver','sensor_driver',
-             {'path_file':str(directory/'path.json'),'target_laps':int(arg('laps'))})]
+             {'path_file':str(path_json),'target_laps':int(arg('laps'))})]
 
 
 def generate_launch_description():
     return LaunchDescription([DeclareLaunchArgument('gui',default_value='false'),
         DeclareLaunchArgument('backend',default_value='gazebo'),DeclareLaunchArgument('seed',default_value='0'),
         DeclareLaunchArgument('laps',default_value='3'),DeclareLaunchArgument('track_dir',default_value=''),
+        DeclareLaunchArgument('map_file',default_value=''),DeclareLaunchArgument('path_file',default_value=''),
+        DeclareLaunchArgument('world_file',default_value=''),
         OpaqueFunction(function=start)])

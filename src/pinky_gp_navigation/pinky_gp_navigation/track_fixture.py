@@ -69,6 +69,8 @@ def event_sdf(event):
 def write_track(directory):
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
+    if any((directory/name).exists() for name in ('map.pgm','map.yaml','path.json','track.sdf')):
+        raise FileExistsError('generated track already exists; use a fresh track_dir')
     cells = occupancy()
     pixels = bytes(0 if cells[y*WIDTH+x] else 254
                    for y in reversed(range(HEIGHT)) for x in range(WIDTH))
