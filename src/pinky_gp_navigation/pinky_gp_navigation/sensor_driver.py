@@ -61,7 +61,7 @@ class SensorDriver(Node):
                 raise ValueError('UNSUPPORTED_MAP_FRAME_OR_ROTATION')
             grid=Occupancy(m.info.width,m.info.height,m.info.resolution,
                            (o.position.x,o.position.y),m.data)
-            if any(not grid.clear(p,set()) for p in self.points):
+            if any(not grid.clear(p) for p in self.points):
                 raise ValueError('REGISTERED_PATH_BLOCKED')
             self.drive=RaceDrive(self.points,grid,self.target,race_id=self.race_id)
         except ValueError as exc:

@@ -120,6 +120,7 @@ def run(args,folder,report):
     remove=n.create_client(DeleteEntity,'/world/pinky_gp/remove')
     world=n.create_client(ControlWorld,'/world/pinky_gp/control')
     def wait(check,label,limit=30):
+        anchor=None
         until=min(begin+args.timeout,time.monotonic()+limit)
         while time.monotonic()<until:
             rclpy.spin_once(n,timeout_sec=.05)
@@ -127,6 +128,11 @@ def run(args,folder,report):
                 raise RuntimeError('launch exited before '+label+'; inspect launch.log')
             if min_clearance < 0:
                 raise RuntimeError(f'footprint clearance {min_clearance:.3f} m at {truth}')
+            if label=='finish' and truth and args.case in ('clean','cone'):
+                if anchor is None or math.dist(anchor[:2],truth[:2])>.055:
+                    anchor=truth
+                elif truth[4]-anchor[4]>12:
+                    raise RuntimeError(f'no forward progress for 12 sim seconds: {last_state} at {truth[:2]}')
             if check(): return
         raise RuntimeError(f'{label}: timed out, state={last_state}, guard={guard}, truth={truth}, cmd={cmd}')
     def service(client,request,label):

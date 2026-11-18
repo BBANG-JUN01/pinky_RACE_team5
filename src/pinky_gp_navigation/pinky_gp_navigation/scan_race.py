@@ -22,6 +22,29 @@ def disk(resolution, radius):
                  if math.hypot(dx, dy)*resolution <= radius + resolution*math.sqrt(2))
 
 
+class ScanFootprint:
+    """Spatial lookup only; the collision decision uses continuous beam coordinates."""
+    def __init__(self, points, radius):
+        self.clearance = radius + .025
+        self.buckets = {}
+        for x,y in points:
+            self.buckets.setdefault(self.key(x,y),[]).append((x,y))
+
+    def key(self,x,y):
+        return math.floor(x/self.clearance),math.floor(y/self.clearance)
+
+    def blocks(self,point):
+        x,y=point
+        i,j=self.key(x,y)
+        d2=self.clearance**2
+        for ii in range(i-1,i+2):
+            for jj in range(j-1,j+2):
+                for px,py in self.buckets.get((ii,jj),()):
+                    if (x-px)**2+(y-py)**2 <= d2:
+                        return True
+        return False
+
+
 class Occupancy:
     def __init__(self, width, height, resolution, origin, data, radius=RADIUS):
         if (width < 1 or height < 1 or len(data) != width*height or len(origin) != 2
@@ -31,12 +54,10 @@ class Occupancy:
         self.res, self.origin, self.radius = resolution, origin, radius
         self.width, self.height = width, height
         self.offsets = disk(resolution, radius)
-        self.occupied = set()
         self.static = set()
         for i, value in enumerate(data):
             if value < 0 or value >= 50:
                 cell = i % width, i // width
-                self.occupied.add(cell)
                 self.inflate(self.static, cell)
 
     def cell(self, x, y):
@@ -46,11 +67,11 @@ class Occupancy:
         x, y = point
         cells.update((x+dx, y+dy) for dx, dy in self.offsets)
 
-    def clear(self, point, live):
+    def clear(self, point, live=None):
         x, y = self.cell(*point)
         border = math.ceil(self.radius/self.res)
         return (border <= x < self.width-border and border <= y < self.height-border
-                and (x, y) not in self.static and (x, y) not in live)
+                and (x, y) not in self.static and (live is None or not live.blocks(point)))
 
 
 def scan_points(ranges, first, step, low, high, laser_pose):
@@ -63,6 +84,9 @@ def scan_points(ranges, first, step, low, high, laser_pose):
     hits = []
     finite_octants = set()
     lx, ly, heading = laser_pose
+    # A dense scan contains several independent returns on the same small face.
+    # Keep foreground discontinuities and every close return, including thin poles.
+    dense = abs(step) < .017
     for i, d in enumerate(ranges):
         if not ((math.isfinite(d) and low <= d <= high) or d == math.inf):
             continue
@@ -70,6 +94,11 @@ def scan_points(ranges, first, step, low, high, laser_pose):
         seen[int((a % (2*math.pi))*4/math.pi) % 8] += 1
         if math.isfinite(d):
             finite_octants.add(int((a % (2*math.pi))*4/math.pi) % 8)
+            if dense and RADIUS+.065 < d < HORIZON+.75:
+                neighbors = sorted(ranges[(i+j) % len(ranges)] for j in (-2,-1,0,1,2)
+                                   if low <= ranges[(i+j) % len(ranges)] <= high)
+                if len(neighbors)>=3 and d >= neighbors[len(neighbors)//2]-.09:
+                    d = neighbors[len(neighbors)//2]
             if d <= HORIZON + .65:
                 hits.append((lx+d*math.cos(a), ly+d*math.sin(a)))
     if len(finite_octants) < 8 or min(seen) < max(2, len(ranges)//24):
@@ -211,11 +240,10 @@ class RaceDrive:
             else:
                 return Drive(reason='PENALTY')
         if self.people: return Drive(reason='PERSON')
-        # Cache unique laser cells. The static map remains immutable during the race.
-        live = set()
-        for cell in {self.grid.cell(px,py) for px,py in hits if math.hypot(px-x,py-y)<HORIZON+.50}:
-            if cell not in self.grid.occupied:
-                self.grid.inflate(live,cell)
+        # Occupancy cells already include raster uncertainty. Live beams retain their
+        # metric coordinates so rounding two endpoints cannot close a traversable gap.
+        live = ScanFootprint(((px,py) for px,py in hits if math.hypot(px-x,py-y)<HORIZON+.50),
+                             self.grid.radius)
         s = p['s']
         cx,cy = self.sample(s,0.)
         nx,ny = self.sample(s,1.)
@@ -226,7 +254,7 @@ class RaceDrive:
         self.clear_frames = min(4,self.clear_frames+1) if center_clear else 0
         preferred = 0. if self.clear_frames>=4 else self.offset
         side = 1. if self.offset >= 0 else -1.
-        for lane in dict.fromkeys([preferred,self.offset,0.,side*.245,side*.26,-side*.245,-side*.26]):
+        for lane in dict.fromkeys([preferred,self.offset,0.,side*.245,side*.225,side*.255,-side*.245,-side*.225,-side*.255]):
             if self.lane_clear(s,lateral,lane,live):
                 if lane != self.offset:
                     self.lane_start,self.lane_start_offset = s,lateral

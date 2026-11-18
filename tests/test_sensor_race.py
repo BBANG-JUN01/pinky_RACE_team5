@@ -6,7 +6,7 @@ from xml.etree import ElementTree as ET
 from pinky_gp_core.sensor_time import fresh
 from pinky_gp_guard.guard_core import CommandGuard
 from pinky_gp_navigation import track_fixture as track
-from pinky_gp_navigation.scan_race import RaceDrive, Occupancy, scan_points
+from pinky_gp_navigation.scan_race import RaceDrive, Occupancy, ScanFootprint, scan_points
 from pinky_gp_race.race_manager import RaceManager
 
 
@@ -27,6 +27,17 @@ class RaceTests(unittest.TestCase):
         self.assertAlmostEqual(hits[0][0],.983)
         self.assertAlmostEqual(hits[0][1],0.)
 
+    def test_metric_footprint_across_hash_boundary(self):
+        h=ScanFootprint([(.149,0.)],.13)
+        self.assertTrue(h.blocks((.30,0.)))
+        self.assertFalse(h.blocks((.31,0.)))
+
+    def test_dense_filter_preserves_single_ray_pole(self):
+        rr=[1.1]*640
+        rr[320]=.38
+        hits=scan_points(rr,-math.pi,2*math.pi/639,.05,12.,(0.,0.,0.))
+        self.assertAlmostEqual(min(math.hypot(x,y) for x,y in hits),.38)
+
     def test_blind_scan_full_wedge(self):
         r=[1.]*80
         r[18:44]=[float('inf')]*26
@@ -38,9 +49,9 @@ class RaceTests(unittest.TestCase):
         with self.assertRaises(ValueError):scan_points([1.]*80,0,.001,.05,12.,self.pose)
 
     def test_map_footprint_and_edges(self):
-        self.assertFalse(self.grid.clear((.0,.53),set()))
-        self.assertFalse(self.grid.clear((-2.04,-.66),set()))
-        self.assertTrue(self.grid.clear((0,0),set()))
+        self.assertFalse(self.grid.clear((.0,.53)))
+        self.assertFalse(self.grid.clear((-2.04,-.66)))
+        self.assertTrue(self.grid.clear((0,0)))
 
     def test_gazebo_and_pgm_share_metric_world(self):
         with tempfile.TemporaryDirectory() as name:

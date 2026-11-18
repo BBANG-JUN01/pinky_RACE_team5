@@ -8,6 +8,10 @@ permissions:
   contents: read
 jobs:
   race:
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [ros-and-rules, gazebo-race]
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     container: ros:jazzy-ros-base
@@ -31,14 +35,28 @@ jobs:
           mkdir -p /tmp/gp_ws
           cd /tmp/gp_ws
           colcon build --base-paths "$GITHUB_WORKSPACE/src" /tmp/pinky-model/pinky_description --packages-up-to pinky_gp_bringup --cmake-args -DBUILD_TESTING=OFF
-      - name: Run regression, ROS and Gazebo gates
+      - name: Run ROS regression and Gazebo flag, barrier and watchdog trials
+        if: matrix.lane == 'ros-and-rules'
         run: |
           source /tmp/gp_ws/install/setup.bash
-          python3 scripts/validate_racing.py --through gazebo --reuse-slam-map --output "$GITHUB_WORKSPACE/log/ci"
+          python3 scripts/validate_racing.py --through ros --output log/ci
+          for scenario in barrier rules watchdog; do
+            python3 scripts/run_single_trial.py --case "$scenario" --output log/ci
+          done
+      - name: Run Gazebo obstacle, repeated clean laps and SLAM map reuse
+        if: matrix.lane == 'gazebo-race'
+        run: |
+          source /tmp/gp_ws/install/setup.bash
+          python3 scripts/run_single_trial.py --case cone --output log/ci
+          python3 scripts/run_single_trial.py --case clean --output log/ci
+          python3 scripts/run_single_trial.py --case clean --bag --output log/ci/capture
+          bag=$(find log/ci/capture -name metadata.yaml -printf '%h')
+          python3 scripts/register_from_bag.py "$bag" log/ci/registered --rate 1.5
+          python3 scripts/run_single_trial.py --case clean --map-file log/ci/registered/map.yaml --output log/ci/reuse
       - name: Preserve measurements and failure logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: single-robot-evidence
+          name: single-robot-evidence-${{ matrix.lane }}
           path: log/ci/
           retention-days: 7
