@@ -1,18 +1,19 @@
-# 최신 요구 변경
+# Pinky GP · Pinky Pro 자율주행 레이스
 
-경기 정찰랩은 제거했다. 사전 등록 지도 + 위치 추정 + 실시간 환경 변화 대응으로 진행한다. [변경 범위와 토요일 실측 계획](docs/REGISTERED_MAP_UPDATE.md)을 우선 적용한다. 하단 기존 정찰 설명은 이전 설계다.
+경기 전에 등록한 지도로 위치를 추정하고, 경기 중 나타나는 장애물은 LiDAR로 판단한다. 첫 검증 목표는 Pinky Pro 한 대의 연속 3랩과 정지다. 두 대 경기는 단독 주행 검증 뒤에 연결한다.
 
-# Pinky GP · pinky_RACE_team5
+**처음 실행하는 팀원은 [시뮬레이션 실행·실패 복구 가이드](docs/SIMULATION_RUNBOOK.md)부터 시작한다.** Jazzy 빌드, Gazebo 화면 보기, 한 조건 재현, SLAM 지도 저장과 재사용, 토요일 실물 순서를 담았다.
 
-Pinky Pro 두 대가 **정찰 → 지도·경로 확정 → 자동 그리드 정렬 → 출발등 → 경기 → 완주/레드 종료**를 수행하는 ROS 2 Jazzy 프로젝트.
-기준: 기획서 v1.2, 4명, 실작업 10일. 전면 LCD 랩타임과 후면 LED 상태 표시를 포함한다.
+```bash
+# 팀 저장소 루트, ROS 없이 가능한 전체 시험
+python3 scripts/validate_racing.py --through software
 
-> 현재 배포는 **개발 가이드 v0.2**다. 19개 기능 모듈에 오프라인 실행 예제와 기본 판단 로직을 제공한다.
-> 실제 센서·YOLO·SLAM·Nav2·모터·LED/LCD 연결은 아직 구현되지 않았다. ROS 노드 네트워크나 완성된 자율주행 프로그램으로 사용하지 않는다.
+# ROS 작업공간 빌드 및 source 후, 공식 모델로 눈으로 확인
+python3 scripts/run_single_trial.py --backend gazebo --case clean --gui
 
-## 토요일 준비 업데이트
-
-[구현·시험·남은 연결 항목](docs/SATURDAY_READINESS.md)을 확인한다. Pure Pursuit와 ROS 후보 명령 노드, 3랩 운동학 시험을 추가했다. Gazebo/SLAM/실물 통합은 미검증이다.
+# 전체 반복 검증과 SLAM으로 내보낸 지도 재사용
+python3 scripts/validate_racing.py --through gazebo --reuse-slam-map
+```
 
 ## 바로 확인하기
 
@@ -28,7 +29,7 @@ python3 scripts/guide_smoke.py
 python3 scripts/progress.py status
 ```
 
-45개 자동 테스트가 경기 규칙·정지·timeout·랩 계시·출발등·추월 취소 등을 검사한다.
+자동 테스트가 경기 규칙·정지·timeout·랩 계시·출발등·추월 취소 등을 검사한다.
 모듈 예제는 합성 데이터이며 실제 주행 명령을 보내지 않는다.
 `python3 scripts/run_module.py <영역>.<모듈> --demo`로 각 예제를 실행한다.
 
@@ -65,7 +66,7 @@ A~D는 역할 코드이며 팀원 이름을 추측해 배정하지 않았다.
 ## 개발 순서
 
 1. **D1 / S00~S01**: 실제 토픽·TF·장비 버전 조사 → 로봇별 최종 명령 소유권·정지 검증.
-2. **D2~D3 / S02~S04**: 정찰·SLAM → 루프 보정 경로·지도 공유 → 단독 완주.
+2. **D2~D3 / S02~S04**: 경기 전 SLAM 지도 등록 → 로봇별 위치 추정과 경로 확인 → 단독 완주.
 3. **D4~D5 / S05~S06**: 그리드·출발등·두 대 기본 경기 → 사람·장애물 대응.
 4. **D6~D8 / S07~S10**: 깃발·SC·페널티·LED/LCD → 지정 추월·DRS.
 5. **D9~D10 / S11**: 기능 동결·반복 시험·로그와 시연. S12 아이템/코너 보상은 선택.
