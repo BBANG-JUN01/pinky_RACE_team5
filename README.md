@@ -6,6 +6,10 @@ Pinky Pro 두 대가 **정찰 → 지도·경로 확정 → 자동 그리드 정
 > 현재 배포는 **개발 가이드 v0.2**다. 19개 기능 모듈에 오프라인 실행 예제와 기본 판단 로직을 제공한다.
 > 실제 센서·YOLO·SLAM·Nav2·모터·LED/LCD 연결은 아직 구현되지 않았다. ROS 노드 네트워크나 완성된 자율주행 프로그램으로 사용하지 않는다.
 
+## 토요일 준비 업데이트
+
+[구현·시험·남은 연결 항목](docs/SATURDAY_READINESS.md)을 확인한다. Pure Pursuit와 ROS 후보 명령 노드, 3랩 운동학 시험을 추가했다. Gazebo/SLAM/실물 통합은 미검증이다.
+
 ## 바로 확인하기
 
 Python 3.10 이상, 추가 패키지 없이 저장소 루트에서 실행한다.
@@ -98,3 +102,4 @@ ros2 run pinky_gp_race race_manager --demo
 - 실물 기본 속도와 timeout은 미측정이며, 코드 예제 수치는 합성 시험용이다.
 
 [검증 결과](docs/VALIDATION.md) · [변경 이력](CHANGELOG.md) · [개발 규칙](CONTRIBUTING.md)
+
