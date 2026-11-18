@@ -2,6 +2,13 @@
 import math
 from .path_manager import LoopPath
 
+def pursuit_curvature(x, y, yaw, tx, ty):
+    dx, dy = tx-x, ty-y
+    if math.cos(yaw)*dx + math.sin(yaw)*dy <= 0:
+        raise ValueError('target behind robot; realign while stopped')
+    return 2*(-math.sin(yaw)*dx+math.cos(yaw)*dy)/max(dx*dx+dy*dy, 1e-9)
+
+
 class PurePursuit:
     def __init__(self, points, lookahead=.25, speed=.15, max_angular=.8, max_error=.35):
         if not all(math.isfinite(v) and v>0 for v in (lookahead,speed,max_angular,max_error)):
@@ -21,11 +28,7 @@ class PurePursuit:
         if not all(math.isfinite(v) for v in (x,y,yaw)):raise ValueError('invalid pose')
         p=self.path.project((x,y),self.segment,window=6,max_error=self.max_error)
         self.segment=p['segment'];tx,ty=self.target(p['s']+self.lookahead)
-        dx,dy=tx-x,ty-y
-        ahead=math.cos(yaw)*dx+math.sin(yaw)*dy
-        lateral=-math.sin(yaw)*dx+math.cos(yaw)*dy
-        if ahead<=0:raise ValueError('target behind robot; realign while stopped')
-        curvature=2*lateral/max(dx*dx+dy*dy,1e-9)
+        curvature=pursuit_curvature(x,y,yaw,tx,ty)
         v=min(self.speed,self.max_angular/max(abs(curvature),1e-9))
         return v,v*curvature,p
 

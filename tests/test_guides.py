@@ -108,7 +108,7 @@ class GuideTests(unittest.TestCase):
     def test_full_race_and_individual_finish(self):
         r=RaceManager('r')
         evidence=dict.fromkeys(['healthy','guard_ready','map_valid','path_valid','shared','localized','both_ready','lights_valid'],True)
-        for i,cmd in enumerate(['CHECK','RECON','MAP_READY','GRID','ARM_START','START']):
+        for i,cmd in enumerate(['CHECK','MAP_READY','GRID','ARM_START','START']):
             self.assertTrue(r.command('r',str(i),cmd,evidence))
         p=ProgressManager();p.start(0.)
         self.assertFalse(p.gate('A','FINISH',.1))
@@ -149,3 +149,4 @@ class GuideTests(unittest.TestCase):
         with self.assertRaises(ValueError):OperatorCommand.build('r','PENALTY',1.,'A',-1.)
 
 if __name__=='__main__':unittest.main()
+

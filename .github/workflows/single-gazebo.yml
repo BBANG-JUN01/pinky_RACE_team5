@@ -1,0 +1,44 @@
+name: Pinky single-robot race
+on:
+  push:
+    branches: [feat/registered-map-weekday-validation]
+    paths: ['src/**', 'scripts/**', 'tests/**', '.github/workflows/single-gazebo.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  race:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    container: ros:jazzy-ros-base
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install simulation dependencies
+        run: |
+          apt-get update -q
+          apt-get install -y --no-install-recommends git python3-colcon-common-extensions mesa-utils libgl1-mesa-dri ros-jazzy-ros-gz ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-nav2-map-server ros-jazzy-nav2-amcl ros-jazzy-nav2-lifecycle-manager
+      - name: Build team packages and the pinned official model
+        run: |
+          git clone https://github.com/pinklab-art/pinky_pro.git /tmp/pinky-model
+          git -C /tmp/pinky-model checkout --detach 014a09f289e6988894fbffde2624fdb1e257815b
+          source /opt/ros/jazzy/setup.bash
+          mkdir -p /tmp/gp_ws
+          cd /tmp/gp_ws
+          colcon build --base-paths "$GITHUB_WORKSPACE/src" /tmp/pinky-model/pinky_description --packages-up-to pinky_gp_bringup --cmake-args -DBUILD_TESTING=OFF
+      - name: Run regression, ROS and Gazebo gates
+        run: |
+          source /tmp/gp_ws/install/setup.bash
+          python3 scripts/validate_racing.py --through gazebo --output "$GITHUB_WORKSPACE/log/ci"
+      - name: Preserve measurements and failure logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: single-robot-evidence
+          path: log/ci/
+          retention-days: 7

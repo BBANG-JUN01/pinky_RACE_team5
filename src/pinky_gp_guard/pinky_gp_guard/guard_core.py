@@ -25,7 +25,7 @@ class CommandGuard:
         self.health[name] = now
 
     def receive(self, source, linear, angular, now):
-        if source != self.source or source is None:
+        if self.stops or source != self.source or source is None:
             return False
         if not all(isfinite(v) for v in (linear, angular, now)):
             self.command = None
@@ -39,8 +39,9 @@ class CommandGuard:
         if active:
             self.stops.add(reason)
             self.command = None
-        else:
-            self.stops.discard(reason)
+        elif reason in self.stops:
+            self.stops.remove(reason)
+            self.command = None
 
     def tick(self, now):
         if not isfinite(now):

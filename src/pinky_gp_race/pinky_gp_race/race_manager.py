@@ -7,8 +7,7 @@ from pinky_gp_core.policy import RacePolicy
 class RaceManager:
     TRANSITIONS = {
         'CHECK':('IDLE','CHECKING',('healthy',)),
-        'RECON':('CHECKING','RECON',('guard_ready',)),
-        'MAP_READY':('RECON','MAP_READY',('map_valid','path_valid','shared')),
+        'MAP_READY':('CHECKING','MAP_READY',('guard_ready','map_valid','path_valid','shared')),
         'GRID':('MAP_READY','GRID_ALIGN',('localized',)),
         'ARM_START':('GRID_ALIGN','STARTING',('both_ready',)),
         'START':('STARTING','RACING',('both_ready','lights_valid','healthy')),
@@ -53,3 +52,4 @@ def main(args=None):
 
 if __name__ == "__main__":
     main()
+

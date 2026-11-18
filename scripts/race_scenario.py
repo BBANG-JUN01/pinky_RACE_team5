@@ -14,7 +14,7 @@ race=RaceManager('synthetic-demo')
 progress=ProgressManager(); penalties=PenaltyManager();stops=StopReasons()
 evidence=dict.fromkeys(['healthy','guard_ready','map_valid','path_valid','shared','localized','both_ready','lights_valid'],True)
 # These booleans describe a synthetic fixture, never real sensor readiness.
-for i,kind in enumerate(['CHECK','RECON','MAP_READY','GRID','ARM_START','START']):
+for i,kind in enumerate(['CHECK','MAP_READY','GRID','ARM_START','START']):
     assert race.command('synthetic-demo',str(i),kind,evidence)
 progress.start(0.)
 def emit(now, remaining=None):
@@ -38,3 +38,4 @@ for robot in ('A','B'):
 race.command('synthetic-demo','finished','FINISH',{'all_finished':True,'all_stopped':True})
 stops.set('FINISHED',True)
 emit(10.)
+
