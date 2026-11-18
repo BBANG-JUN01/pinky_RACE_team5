@@ -1,0 +1,20 @@
+PASS pinky_gp_behavior.behavior_manager
+PASS pinky_gp_behavior.speed_policy
+PASS pinky_gp_dashboard.operator_server
+PASS pinky_gp_display.display_manager
+PASS pinky_gp_guard.command_guard
+PASS pinky_gp_guard.robot_health
+PASS pinky_gp_navigation.grid_manager
+PASS pinky_gp_navigation.nav2_adapter
+PASS pinky_gp_navigation.path_manager
+PASS pinky_gp_perception.detector
+PASS pinky_gp_perception.grid_reader
+PASS pinky_gp_perception.range_association
+PASS pinky_gp_perception.signal_reader
+PASS pinky_gp_race.penalty_manager
+PASS pinky_gp_race.progress_manager
+PASS pinky_gp_race.race_manager
+PASS pinky_gp_recon.map_finalize
+PASS pinky_gp_recon.recon_manager
+PASS pinky_gp_recon.wall_follower
+19 demos passed; Python AST and package XML parsed.
