@@ -15,6 +15,7 @@
 ```bash
 python3 scripts/check_core.py
 python3 scripts/compare_racelines.py
+python3 scripts/verify_optimized_sensors.py
 python3 -c "from pinky_gp_navigation.track_fixture import write_track; from pathlib import Path; write_track(Path('/tmp/ab_track'))"
 python3 scripts/optimize_raceline.py --map /tmp/ab_track/map.yaml --reference /tmp/ab_track/path.json --profile src/pinky_gp_bringup/config/racing_sim.json --offset 0.20 --output /tmp/ab_track/optimized.json
 python3 scripts/run_single_trial.py --case clean --limits-file src/pinky_gp_bringup/config/racing_sim.json --output log/ab/baseline
@@ -96,3 +97,5 @@ A는 ROS_DOMAIN_ID=41, B는 42로 분리한다. 각 로봇의 공식 bringup, ra
 python3 scripts/duel_control.py start --domains 41 42
 python3 scripts/duel_control.py stop --domains 41 42
 ```
+
+추가 검증: 640광선, 거리 노이즈 표준편차 0.02m, 서로 다른 seed 3회에서 후보 경로가 각 3랩 완주했다. 최소 벽 여유 0.0853m 이상이었다. 이 시험은 raycast + 운동학 모델이며 Gazebo와 구분한다. 로컬 단위/회귀 테스트는 84개 통과했다.
