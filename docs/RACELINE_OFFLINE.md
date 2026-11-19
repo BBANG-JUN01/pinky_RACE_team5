@@ -89,3 +89,10 @@ A는 ROS_DOMAIN_ID=41, B는 42로 분리한다. 각 로봇의 공식 bringup, ra
 | READY 안 됨 | /scan·/odom 시각, TF, AMCL 공분산 및 초기 위치 확인 |
 | 두 대 명령 섞임 | 두 로봇과 각 터미널의 ROS_DOMAIN_ID 재확인 |
 | 상대 앞에서 교착 | 정지 유지 후 운영자 재배치; 협력 추월 미구현 상태로 기록 |
+
+두 도메인에 연결되는 운영 PC에서는 아래 도구로 출발/정지 요청을 병렬 발행할 수 있다. 한 대라도 출발 승인이 실패하면 두 대 모두 정지를 요청한다. 통신 단절 시 원격 정지 응답은 보장되지 않으므로 각 로봇의 독립 비상정지는 유지한다. 출발 시각 동기화나 판정 서버를 대신하는 기능은 아니다.
+
+```bash
+python3 scripts/duel_control.py start --domains 41 42
+python3 scripts/duel_control.py stop --domains 41 42
+```
