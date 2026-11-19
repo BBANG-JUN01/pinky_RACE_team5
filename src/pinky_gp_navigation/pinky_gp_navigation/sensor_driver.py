@@ -1,4 +1,5 @@
 """One-robot simulation adapter. Uses TF at laser acquisition time, never truth."""
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -18,16 +19,25 @@ from tf2_ros import Buffer, TransformException, TransformListener
 from pinky_gp_core.sensor_time import fresh, seconds, yaw
 from pinky_gp_interfaces.msg import RaceCommand
 from .scan_race import Drive, Occupancy, RaceDrive, scan_points
+from .raceline import validate_path
+from .vehicle_profile import load_profile
 
 
 class SensorDriver(Node):
     def __init__(self):
         super().__init__('sensor_driver')
-        if not self.get_parameter('use_sim_time').value:
-            raise ValueError('simulation time required')
+        self.hardware=not self.get_parameter('use_sim_time').value
+        limits_file=self.declare_parameter('limits_file','').value
+        self.racing_profile,self.radius = load_profile(limits_file,self.hardware) if limits_file else (None,.13)
+        if self.hardware and self.racing_profile is None:
+            raise ValueError('measured hardware limits required')
+        self.robot_id=self.declare_parameter('robot_id','pinky').value
         path = Path(self.declare_parameter('path_file','').value)
         profile = json.loads(path.read_text())
         if profile['frame_id'] != 'map': raise ValueError('path must use map frame')
+        if 'provenance' in profile:
+            if not limits_file or hashlib.sha256(Path(limits_file).read_bytes()).hexdigest()!=profile['provenance']['profile_sha256']:
+                raise ValueError('optimized path profile changed: regenerate the path')
         self.points = profile['points']
         self.target = self.declare_parameter('target_laps',3).value
         self.race_id = self.declare_parameter('race_id','sim').value
@@ -60,10 +70,12 @@ class SensorDriver(Node):
             if m.header.frame_id!='map' or abs(yaw(o.orientation))>1e-5:
                 raise ValueError('UNSUPPORTED_MAP_FRAME_OR_ROTATION')
             grid=Occupancy(m.info.width,m.info.height,m.info.resolution,
-                           (o.position.x,o.position.y),m.data)
-            if any(not grid.clear(p) for p in self.points):
-                raise ValueError('REGISTERED_PATH_BLOCKED')
-            self.drive=RaceDrive(self.points,grid,self.target,race_id=self.race_id)
+                           (o.position.x,o.position.y),m.data,self.radius)
+            validate_path(self.points,grid)
+            kwargs={'race_id':self.race_id}
+            if self.racing_profile:
+                kwargs.update(limits=self.racing_profile.limits,racing_profile=self.racing_profile)
+            self.drive=RaceDrive(self.points,grid,self.target,**kwargs)
         except ValueError as exc:
             self.config_fault=str(exc)
 
@@ -88,7 +100,7 @@ class SensorDriver(Node):
 
     def event(self,m):
         now=self.ros_now()
-        if (self.drive and m.race_id==self.race_id and m.target_robot in ('pinky','all')
+        if (self.drive and m.race_id==self.race_id and m.target_robot in (self.robot_id,'all')
                 and fresh(seconds(m.stamp),now,.6)):
             self.drive.event(m.kind,m.command_id,seconds(m.stamp),m.duration_s)
 

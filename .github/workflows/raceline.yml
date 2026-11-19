@@ -1,0 +1,54 @@
+name: Racing line A-B validation
+on:
+  push:
+    branches: [feat/registered-map-weekday-validation]
+    paths: ['src/**', 'scripts/**', 'tests/**', '.github/workflows/raceline.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    container: ros:jazzy-ros-base
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install
+        run: |
+          apt-get update -q
+          apt-get install -y --no-install-recommends git python3-pil python3-yaml python3-colcon-common-extensions mesa-utils libgl1-mesa-dri ros-jazzy-ros-gz ros-jazzy-xacro ros-jazzy-robot-state-publisher ros-jazzy-nav2-map-server ros-jazzy-nav2-amcl ros-jazzy-nav2-lifecycle-manager
+      - name: Build
+        run: |
+          git clone https://github.com/pinklab-art/pinky_pro.git /tmp/pinky-model
+          git -C /tmp/pinky-model checkout --detach 014a09f289e6988894fbffde2624fdb1e257815b
+          source /opt/ros/jazzy/setup.bash
+          mkdir -p /tmp/gp_ws
+          cd /tmp/gp_ws
+          colcon build --base-paths "$GITHUB_WORKSPACE/src" /tmp/pinky-model/pinky_description --packages-up-to pinky_gp_bringup --cmake-args -DBUILD_TESTING=OFF
+      - name: Unit and closed-loop checks
+        run: |
+          mkdir -p log/raceline
+          python3 scripts/check_core.py
+          python3 scripts/compare_racelines.py > log/raceline/kinematic.json
+      - name: Generate map and optimize
+        run: |
+          source /tmp/gp_ws/install/setup.bash
+          python3 -c "from pinky_gp_navigation.track_fixture import write_track; from pathlib import Path; write_track(Path('/tmp/ab_track'))"
+          python3 scripts/optimize_raceline.py --map /tmp/ab_track/map.yaml --reference /tmp/ab_track/path.json --profile src/pinky_gp_bringup/config/racing_sim.json --offset 0.20 --output /tmp/ab_track/optimized.json
+      - name: Compare three actual Gazebo laps with identical limits
+        run: |
+          source /tmp/gp_ws/install/setup.bash
+          python3 scripts/run_single_trial.py --case clean --limits-file src/pinky_gp_bringup/config/racing_sim.json --output log/raceline/baseline
+          python3 scripts/run_single_trial.py --case clean --limits-file src/pinky_gp_bringup/config/racing_sim.json --path-file /tmp/ab_track/optimized.json --output log/raceline/optimized
+          python3 scripts/score_raceline_trials.py log/raceline/baseline log/raceline/optimized > log/raceline/comparison.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: racing-line-evidence
+          path: log/raceline/

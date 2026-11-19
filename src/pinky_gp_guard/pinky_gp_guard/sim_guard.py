@@ -12,14 +12,19 @@ from std_srvs.srv import SetBool
 from std_msgs.msg import String
 from pinky_gp_core.sensor_time import fresh, seconds
 from .guard_core import CommandGuard
+from pinky_gp_navigation.vehicle_profile import load_profile
 
 
 class SimGuard(Node):
     def __init__(self):
         super().__init__('sim_guard')
-        if not self.get_parameter('use_sim_time').value:
-            raise ValueError('simulation time required')
-        self.guard=CommandGuard(.24,1.65,.65,required=('scan','odom'))
+        hardware=not self.get_parameter('use_sim_time').value
+        path=self.declare_parameter('limits_file','').value
+        self.profile=load_profile(path,hardware)[0] if path else None
+        if hardware and self.profile is None: raise ValueError('measured hardware limits required')
+        limits=self.profile.limits if self.profile else None
+        self.guard=CommandGuard(limits.speed if limits else .24, limits.angular if limits else 1.65,
+                                .65,required=('scan','odom'))
         self.guard.select('tracker')
         self.stamps={}
         self.last_ros=0.
@@ -69,6 +74,10 @@ class SimGuard(Node):
                             for k in ('scan','odom','candidate')):
             v=w=0.
             reasons=('STALE_HEADER',)
+        if self.profile:
+            wheel=max(abs(v-w*self.profile.wheel_separation/2),abs(v+w*self.profile.wheel_separation/2))
+            scale=min(1.,self.profile.wheel_speed/max(wheel,1e-9))
+            v*=scale;w*=scale
         msg=Twist()
         msg.linear.x=v
         msg.angular.z=w

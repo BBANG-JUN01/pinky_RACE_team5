@@ -22,6 +22,8 @@ def options():
     p.add_argument('--timeout',type=float,default=360,help='wall seconds per trial')
     p.add_argument('--output',type=Path,default=Path('log/gp_trials'))
     p.add_argument('--map-file',type=Path,help='registered map of this scoring fixture')
+    p.add_argument('--path-file',type=Path)
+    p.add_argument('--limits-file',type=Path)
     p.add_argument('--gui',action='store_true')
     p.add_argument('--bag',action='store_true')
     args=p.parse_args()
@@ -174,6 +176,10 @@ def run(args,folder,report):
             raise RuntimeError('registered map path is missing')
         report['map_yaml_sha256']=hashlib.sha256(registered.read_bytes()).hexdigest()
         launch.append('map_file:='+str(registered))
+    for key in ('path_file','limits_file'):
+        value=getattr(args,key)
+        if value:
+            launch.append(key+':='+str(value.resolve()))
     try:
         proc=subprocess.Popen(launch,stdout=logs,stderr=subprocess.STDOUT,start_new_session=True,env=env)
         if args.bag:

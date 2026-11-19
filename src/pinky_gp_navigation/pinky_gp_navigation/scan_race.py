@@ -7,6 +7,7 @@ from pinky_gp_core.policy import Penalty, RacePolicy
 from pinky_gp_core.timing import LapTimer
 from .hardware_limits import Limits, speed_profile
 from .pure_pursuit import PurePursuit, pursuit_curvature
+from .raceline import RacingProfile, trajectory
 
 # Simulation profile only. Hardware launch has an independent measured-limit gate.
 SIM_LIMITS = Limits(speed=.24, braking=.60, latency=.23, margin=.03, lateral_accel=.32, angular=1.65)
@@ -115,12 +116,13 @@ class Drive:
 
 
 class RaceDrive:
-    def __init__(self, points, grid, laps=3, limits=SIM_LIMITS, race_id='sim'):
+    def __init__(self, points, grid, laps=3, limits=SIM_LIMITS, race_id='sim', racing_profile=None):
         if type(laps) is not int or laps < 1:
             raise ValueError('INVALID_LAPS')
         self.tracker = PurePursuit(points, LOOKAHEAD, limits.speed, limits.angular, .45)
         self.path = self.tracker.path
-        self.caps = speed_profile(points, limits)
+        self.racing_profile = racing_profile
+        self.caps = trajectory(points,racing_profile)[0] if racing_profile else speed_profile(points,limits)
         self.grid, self.limit, self.goal = grid, limits, laps
         self.timer = LapTimer(('Q1','Q2','Q3','LINE'))
         self.policy = RacePolicy(race_id)
@@ -217,6 +219,7 @@ class RaceDrive:
             return Drive(reason='INVALID_INPUT')
         if self.last_at is not None and now <= self.last_at:
             return Drive(reason='OLD_SAMPLE')
+        dt = min(.15,now-self.last_at) if self.last_at is not None else .1
         x,y,yaw = pose
         try:
             if self.previous_pose is not None:
@@ -272,6 +275,9 @@ class RaceDrive:
         cap = min(self.caps[idx],self.caps[(idx+1)%len(self.caps)],self.limit.corner_cap(k))
         cap = min(cap, {'NORMAL':self.limit.speed,'YELLOW':.12,'SC':.09}[self.policy.restriction.value])
         if self.offset: cap = min(cap,.16)
+        if self.racing_profile:
+            cap=min(cap,self.racing_profile.wheel_speed/(1+abs(k)*self.racing_profile.wheel_separation/2),
+                    max(0.,measured_v)+self.racing_profile.acceleration*dt)
         # Check the actual commanded arc for at least the current stopping distance.
         speed = max(cap,abs(measured_v))
         required = self.limit.margin+speed*self.limit.latency+speed**2/(2*self.limit.braking)

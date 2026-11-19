@@ -69,9 +69,9 @@ def start(context):
              'laser_likelihood_max_dist':.55,'alpha1':.05,'alpha2':.05,'alpha3':.05,'alpha4':.05}),
         node('nav2_lifecycle_manager','lifecycle_manager','lifecycle_localization',
              {'autostart':True,'node_names':['map_server','amcl']}),
-        node('pinky_gp_guard','sim_guard','sim_guard',on_exit=Shutdown(reason='motor guard exited')),
+        node('pinky_gp_guard','sim_guard','sim_guard',{'limits_file':arg('limits_file')},on_exit=Shutdown(reason='motor guard exited')),
         node('pinky_gp_navigation','sensor_driver','sensor_driver',
-             {'path_file':str(path_json),'target_laps':int(arg('laps'))})]
+             {'path_file':str(path_json),'target_laps':int(arg('laps')),'limits_file':arg('limits_file')})]
 
 
 def generate_launch_description():
@@ -79,5 +79,5 @@ def generate_launch_description():
         DeclareLaunchArgument('backend',default_value='gazebo'),DeclareLaunchArgument('seed',default_value='0'),
         DeclareLaunchArgument('laps',default_value='3'),DeclareLaunchArgument('track_dir',default_value=''),
         DeclareLaunchArgument('map_file',default_value=''),DeclareLaunchArgument('path_file',default_value=''),
-        DeclareLaunchArgument('world_file',default_value=''),
+        DeclareLaunchArgument('world_file',default_value=''),DeclareLaunchArgument('limits_file',default_value=''),
         OpaqueFunction(function=start)])
