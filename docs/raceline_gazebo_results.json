@@ -1,0 +1,61 @@
+{
+  "workflow": "https://github.com/BBANG-JUN01/pinky_RACE_team5/actions/runs/44444545644",
+  "runtime_commit": "a1f31fe11f5b477a40d5ac18c3d4a8fafe68ae04",
+  "baseline": {
+    "backend": "gazebo",
+    "case": "clean",
+    "seed": 0,
+    "passed": true,
+    "counts": {
+      "scan": 927,
+      "odom": 4634,
+      "truth": 2726,
+      "state_WAIT_TF": 6,
+      "cmd": 2315,
+      "state_READY": 1,
+      "state_TRACKING": 915,
+      "state_FINISHED": 27
+    },
+    "last_state": "FINISHED",
+    "truth_laps": 3,
+    "final_truth_xy": [
+      0.05179424145376852,
+      0.0016459359230864754
+    ],
+    "lap_times_s": [
+      30.78635719184008,
+      30.309667202688477,
+      30.38047425987257
+    ],
+    "wall_s": 96.24,
+    "min_margin_m": 0.1936
+  },
+  "optimized": {
+    "backend": "gazebo",
+    "case": "clean",
+    "seed": 0,
+    "passed": true,
+    "counts": {
+      "scan": 779,
+      "odom": 3894,
+      "truth": 2291,
+      "cmd": 1940,
+      "state_READY": 1,
+      "state_TRACKING": 766,
+      "state_FINISHED": 27
+    },
+    "last_state": "FINISHED",
+    "truth_laps": 3,
+    "final_truth_xy": [
+      0.040466886339778185,
+      0.012013974997031024
+    ],
+    "lap_times_s": [
+      25.84956332187578,
+      25.346293893880276,
+      25.347538966626388
+    ],
+    "wall_s": 81.25,
+    "min_margin_m": 0.0748
+  }
+}

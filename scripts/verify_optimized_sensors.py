@@ -1,3 +1,4 @@
+import argparse
 import importlib.util,json,sys
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
@@ -10,7 +11,12 @@ grid=m.Occupancy(m.track.WIDTH,m.track.HEIGHT,m.track.RES,m.track.ORIGIN,m.track
 q=optimize(m.track.centerline(),grid,p)
 original=m.RaceDrive
 m.RaceDrive=lambda points,grid,laps:original(q['points'],grid,laps,limits=p.limits,racing_profile=p)
-rows=[m.run(i,'clean',grid,dense=True) for i in range(3)]
+parser=argparse.ArgumentParser()
+parser.add_argument('--scenario',choices=['clean','cone','barrier'],default='clean')
+parser.add_argument('--seeds',type=int,default=3)
+args=parser.parse_args()
+if args.seeds<1:parser.error('positive seed count required')
+rows=[m.run(i,args.scenario,grid,dense=True) for i in range(args.seeds)]
 print(json.dumps(rows,indent=2))
 
 if not all(r['pass'] for r in rows):raise SystemExit(1)
